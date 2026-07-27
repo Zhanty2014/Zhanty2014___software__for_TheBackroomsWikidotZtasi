@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>☕ 咖啡小镇 v1.0.0 · 手作科研经营</title>
+    <style>
+        :root {
+            --bg: #1a1410;
+            --panel: #2c2218;
+            --card: #3d3024;
+            --gold: #f4c542;
+            --accent: #c8956c;
+            --text: #e8d5c4;
+            --text-light: #b8a590;
+            --danger: #e05555;
+            --success: #5cb878;
+            --info: #5b9bd5;
+            --border: #5a4430;
+            --highlight: #f0a050;
+            --cheat-bg: #5c3a1e;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0d0a07;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        /* ==================== 封面覆盖层 ==================== */
+        #coverOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1e1008 0%, #0a0400 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 200;
+            transition: opacity 0.7s, visibility 0.7s;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        #coverOverlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .cover-container {
+            max-width: 750px;
+            width: 100%;
+            background: rgba(30, 16, 8, 0.85);
+            border: 2px solid #4a3020;
+            border-radius: 24px;
+            padding: 30px 28px;
+            box-shadow: 0 0 60px rgba(180, 100, 40, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: auto;
+        }
+        .cover-header {
+            text-align: center;
+        }
+        .cover-title {
+            font-size: 2.8em;
+            font-weight: 900;
+            color: #f0c070;
+            text-shadow: 0 0 40px rgba(200, 140, 60, 0.6);
+            letter-spacing: 4px;
+            line-height: 1.1;
+        }
+        .cover-version {
+            font-size: 1em;
+            color: #d4a574;
+            letter-spacing: 2px;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+        .cover-tagline {
+            color: #8a7060;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .cover-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #5a4030, transparent);
+            border: none;
+        }
+        .cover-section-title {
+            font-weight: 700;
+            font-size: 1.05em;
+            color: #d4a574;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cover-section-title .icon {
+            font-size: 1.2em;
+        }
+
+        /* 更新日志 */
+        .changelog-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-left: 0;
+        }
+        .changelog-list li {
+            background: rgba(0, 0, 0, 0.25);
+            border-left: 3px solid #c8956c;
+            padding: 10px 14px;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        .changelog-list li .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-right: 6px;
+        }
+        .tag-new {
+            background: #3d7050;
+            color: #8cd8a0;
+        }
+        .tag-fix {
+            background: #5a3a1a;
+            color: #f0a050;
+        }
+        .tag-polish {
+            background: #2a3a4a;
+            color: #8ab8d8;
+        }
+
+        /* Q&A */
+        .qa-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .qa-item {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+        .qa-item:hover {
+            border-color: #5a4030;
+        }
+        .qa-question {
+            font-weight: 700;
+            font-size: 0.85em;
+            color: #f0c070;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+        .qa-question .qa-arrow {
+            transition: transform 0.3s;
+            font-size: 0.7em;
+            color: #c8956c;
+        }
+        .qa-question.open .qa-arrow {
+            transform: rotate(90deg);
+        }
+        .qa-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, margin-top 0.5s ease;
+            font-size: 0.78em;
+            color: #b8a590;
+            line-height: 1.7;
+            margin-top: 0;
+        }
+        .qa-answer.expanded {
+            max-height: 600px;
+            margin-top: 10px;
+        }
+        .qa-answer strong {
+            color: #d4a574;
+        }
+        .qa-answer em {
+            color: #f0a050;
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        /* 开始按钮 */
+        .cover-start-btn {
+            padding: 16px 50px;
+            font-size: 1.3em;
+            font-weight: 700;
+            border-radius: 35px;
+            background: linear-gradient(135deg, #c8956c, #8b5a3a);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s;
+            letter-spacing: 3px;
+            align-self: center;
+            margin-top: 8px;
+        }
+        .cover-start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 14px 40px rgba(200, 120, 40, 0.5);
+            background: linear-gradient(135deg, #d4a574, #a07050);
+        }
+
+        /* ==================== 游戏主体 ==================== */
+        .game-container {
+            width: 100%;
+            max-width: 1150px;
+            background: var(--panel);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 98vh;
+        }
+        .header {
+            background: linear-gradient(180deg, #3d2a18, #2c1a0c);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 5px;
+            border-bottom: 2px solid var(--border);
+            z-index: 20;
+            position: relative;
+        }
+        .logo {
+            font-size: 1.15em;
+            font-weight: 700;
+            color: #f0c070;
+            white-space: nowrap;
+            letter-spacing: 1px;
+        }
+        .stat-bar {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 8px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 0.7em;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            white-space: nowrap;
+        }
+        .stat-item.gold-stat {
+            background: rgba(200, 140, 40, 0.15);
+        }
+        .stat-val {
+            color: var(--highlight);
+            font-weight: 700;
+        }
+        .gold-stat .stat-val {
+            color: var(--gold);
+        }
+        .btn-header {
+            padding: 5px 10px;
+            border-radius: 16px;
+            border: 2px solid;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.68em;
+            transition: 0.2s;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+        .btn-pause {
+            background: #4a2e5c;
+            border-color: #b366ff;
+            color: #e0c0ff;
+        }
+        .btn-pause.paused {
+            background: #6a2090;
+            border-color: #e0a0ff;
+        }
+        .btn-save {
+            background: #2a4a2a;
+            border-color: #5a8a5a;
+            color: #c0e0c0;
+        }
+        .btn-load {
+            background: #2a3a4a;
+            border-color: #5a7a9a;
+            color: #c0d0e0;
+        }
+        .btn-cheat {
+            background: var(--cheat-bg);
+            border-color: rgba(255, 170, 51, 0.5);
+            color: #ffdd99;
+        }
+        .cheat-panel {
+            position: absolute;
+            top: 52px;
+            right: 10px;
+            background: #3d2a15;
+            border: 2px solid #f0a050;
+            border-radius: 14px;
+            padding: 12px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 40;
+            min-width: 170px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.7);
+        }
+        .cheat-panel.visible {
+            display: flex;
+        }
+        .cheat-panel .cheat-close-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cheat-panel .cheat-close-btn {
+            background: none;
+            border: none;
+            color: #f0a050;
+            cursor: pointer;
+            font-size: 1.1em;
+            padding: 0 4px;
+        }
+        .cheat-panel button {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 170, 51, 0.35);
+            color: #ffdd99;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.7em;
+            text-align: left;
+            transition: 0.2s;
+        }
+        .cheat-panel button:hover {
+            background: rgba(255, 170, 51, 0.18);
+            border-color: #f0a050;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr 1fr;
+            gap: 7px;
+            padding: 7px;
+            overflow-y: auto;
+            flex: 1;
+            min-height: 0;
+        }
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .cover-title {
+                font-size: 2em;
+            }
+            .cover-container {
+                padding: 20px 16px;
+            }
+        }
+        .panel {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .panel-title {
+            font-weight: 700;
+            font-size: 0.78em;
+            color: #d4a574;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 5px;
+        }
+        .btn {
+            padding: 5px 9px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.68em;
+            transition: 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .btn:active {
+            transform: scale(0.94);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #c8956c, #a07050);
+            color: #fff;
+        }
+        .btn-primary:disabled {
+            background: #5a4a3a;
+            color: #8a7a6a;
+            cursor: not-allowed;
+        }
+        .btn-buy {
+            background: #3d9055;
+            color: #fff;
+        }
+        .btn-upgrade {
+            background: #f0a050;
+            color: #1a0800;
+        }
+        .btn-sm {
+            padding: 4px 7px;
+            font-size: 0.63em;
+            border-radius: 10px;
+        }
+        .btn-xs {
+            padding: 2px 5px;
+            font-size: 0.58em;
+            border-radius: 8px;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid #e05555;
+            color: #e08888;
+            font-size: 0.58em;
+            padding: 2px 5px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3px;
+        }
+        .inv-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            padding: 4px 6px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.68em;
+        }
+        .inv-count {
+            font-weight: 700;
+            color: #f0d0a0;
+        }
+        .craft-slot {
+            background: #2a1f15;
+            border-radius: 8px;
+            padding: 7px 9px;
+            border: 2px solid #3a2a18;
+        }
+        .craft-slot.active {
+            border-color: #f0a050;
+        }
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.72em;
+        }
+        .steps-row {
+            display: flex;
+            gap: 2px;
+            margin: 4px 0;
+            align-items: center;
+        }
+        .step-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55em;
+            border: 2px solid transparent;
+        }
+        .step-dot.done {
+            background: #3d7050;
+            border-color: #5cb878;
+        }
+        .step-dot.active {
+            background: #5a3a1a;
+            border-color: #f0a050;
+            animation: pulse 1s infinite;
+        }
+        .step-dot.pending {
+            background: #3a2a1a;
+            border-color: #4a3a2a;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 4px #f0a050;
+            }
+            50% {
+                box-shadow: 0 0 14px #f0a050;
+            }
+        }
+        .progress-mini {
+            height: 3px;
+            background: #1a1008;
+            border-radius: 2px;
+            margin-top: 3px;
+        }
+        .progress-mini-fill {
+            height: 100%;
+            background: #f0a050;
+            width: 0%;
+            transition: width 0.2s;
+        }
+        .customer-queue {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+        .customer-bubble {
+            background: #4a3525;
+            border-radius: 10px;
+            padding: 3px 7px;
+            font-size: 0.63em;
+            border: 1px solid #6a4a30;
+        }
+        .log-area {
+            max-height: 70px;
+            overflow-y: auto;
+            font-size: 0.58em;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+        .log-entry.good {
+            color: #8cd8a0;
+        }
+        .log-entry.bad {
+            color: #e08888;
+        }
+        .log-entry.info {
+            color: #8ab8d8;
+        }
+        .float-gold {
+            position: fixed;
+            pointer-events: none;
+            font-weight: 700;
+            color: var(--gold);
+            animation: floatUp 1.2s forwards;
+            z-index: 999;
+            font-size: 0.95em;
+        }
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-55px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== 封面 ==================== -->
+    <div id="coverOverlay">
+        <div class="cover-container">
+            <!-- 标题和版本 -->
+            <div class="cover-header">
+                <div class="cover-title">☕ 咖啡小镇</div>
+                <div class="cover-version">版本 v1.0.0</div>
+                <div class="cover-tagline">深度手作 · 科研经营 · 模拟咖啡馆</div>
+            </div>
+            <hr class="cover-divider">
+
+            <!-- 更新内容 -->
+            <div class="cover-section-title"><span class="icon">📋</span> 更新内容 · v1.0.0</div>
+            <ul class="changelog-list">
+                <li><span class="tag tag-new">新增</span> <strong>手动多步骤制作系统</strong>：每杯咖啡需亲自操作研磨→萃取→调配→装杯等完整流程，每个步骤独立计时</li>
+                <li><span class="tag tag-new">新增</span> <strong>科研解锁机制</strong>：卡布奇诺、摩卡等饮品需消耗研究点数和金币进行科研解锁，研究有耗时进度</li>
+                <li><span class="tag tag-new">新增</span> <strong>并行制作槽位</strong>：可升级至3个槽位，同时制作不同饮品，自由安排工序节奏</li>
+                <li><span class="tag tag-new">新增</span> <strong>外挂辅助面板</strong>：提供金币、原料、研究点、瞬间完成等便捷功能（点击🧪按钮）</li>
+                <li><span class="tag tag-new">新增</span> <strong>本地存档/读档</strong>：经营进度一键保存至浏览器，支持随时读取</li>
+                <li><span class="tag tag-fix">优化</span> 顾客系统：耐心值可视化，声望影响客流，服务顾客获得研究点数</li>
+                <li><span class="tag tag-polish">打磨</span> 完整经营循环：采购原料→手动制作→顾客购买→赚取金币→升级/科研→解锁新品</li>
+            </ul>
+            <hr class="cover-divider">
+
+            <!-- 详细Q&A -->
+            <div class="cover-section-title"><span class="icon">❓</span> 常见问题 Q&A（详细）</div>
+            <div class="qa-list" id="qaList">
+                <!-- Q1 -->
+                <div class="qa-item">
+                    <div class="qa-question" onclick="toggleQA(this)"><span class="qa-arrow">▶</span> Q1: 如何制作咖啡？步骤是怎样的？</div>
+                    <div class="qa-answer">
+                        <strong>制作流程分为以下步骤：</strong><br>
+                        ① 在<em>制作工坊</em>区域，点击任意已解锁饮品的<em>"制作"</em>按钮，系统会消耗原料并创建一个制作槽位。<br>
+                        ② 槽位中会显示步骤链（如 🫘研磨 → ☕萃取 → 🥤装杯）。当前步骤的圆点会<em>高亮闪烁</em>。<br>
+                        ③ 点击<em>"开始[步骤名]"</em>按钮，该步骤开始计时，进度条会逐渐填满。<br>
+                        ④ 步骤完成后状态变为"完成"，点击<em>"继续下一步"</em>进入下一个步骤。<br>
+                        ⑤ 所有步骤完成后饮品自动放入<em>展示柜</em>，等待顾客购买。<br>
+                        <strong>提示：</strong>升级"咖啡机"可加快每个步骤的速度；升级"制作槽位"可同时制作多杯咖啡。
+                    </div>
+                </div>
+                <!-- Q2 -->
+                <div class="qa-item">
+                    <div class="qa-question" onclick="toggleQA(this)"><span class="qa-arrow">▶</span> Q2: 科研系统怎么用？如何解锁新饮品？</div>
+                    <div class="qa-answer">
+                        <strong>科研是解锁高级饮品的核心途径：</strong><br>
+                        ① 在右侧面板的<em>"科研"</em>区域查看可研究的项目，每个项目显示所需<em>研究点🔬、金币💰和时间⏱</em>。<br>
+                        ② 研究点通过<em>服务顾客</em>获得（每位顾客+1点）。<br>
+                        ③ 满足条件后点击<em>"研究"</em>按钮，消耗资源并开始计时。<br>
+                        ④ 研究期间进度条会增长，完成后自动解锁对应饮品或升级效果。<br>
+                        ⑤ 卡布奇诺、摩卡、冰拿铁、奶油咖啡均需通过科研解锁。<br>
+                        <strong>技巧：</strong>优先研究卡布奇诺（成本低），积累研究点后再解锁高价饮品。
+                    </div>
+                </div>
+                <!-- Q3 -->
+                <div class="qa-item">
+                    <div class="qa-question" onclick="toggleQA(this)"><span class="qa-arrow">▶</span> Q3: 如何快速赚钱？有什么经营技巧？</div>
+                    <div class="qa-answer">
+                        <strong>高效赚钱策略：</strong><br>
+                        ① <em>合理定价：</em>在菜单中使用 +/- 按钮调整价格。定价过低利润薄，过高顾客仍会购买但可能影响声望增长。建议在基础成本的<em>2~3倍</em>之间。<br>
+                        ② <em>提前备货：</em>利用暂停时间功能（⏸️按钮）冻结营业时间，提前制作多杯饮品存入展示柜，客流高峰时直接售卖。<br>
+                        ③ <em>升级展示柜：</em>扩大容量可存储更多成品，减少顾客流失。<br>
+                        ④ <em>自动咖啡机：</em>升级后在空闲槽位自动制作美式，稳定产出基础饮品。<br>
+                        ⑤ <em>服务效率：</em>保持展示柜有货，顾客耐心耗尽会离开并降低声望，影响后续客流。
+                    </div>
+                </div>
+                <!-- Q4 -->
+                <div class="qa-item">
+                    <div class="qa-question" onclick="toggleQA(this)"><span class="qa-arrow">▶</span> Q4: 顾客系统是怎么运作的？</div>
+                    <div class="qa-answer">
+                        <strong>顾客机制详解：</strong><br>
+                        ① 顾客随机进店（声望越高，客流越大），每人<em>指定一种已解锁饮品</em>。<br>
+                        ② 展示柜中有对应饮品时自动售出，获得金币和<em>1点研究点</em>，并提升声望。<br>
+                        ③ 若展示柜无货，顾客会<em>排队等待</em>，耐心值逐渐下降（可视进度条）。<br>
+                        ④ 耐心耗尽后顾客<em>愤怒离开</em>，声望-2，影响后续客流质量。<br>
+                        ⑤ 同时最多排队<em>6人</em>，超过则不再生成新顾客。<br>
+                        <strong>策略：</strong>保持展示柜有热门饮品库存，或利用暂停时间紧急补货。
+                    </div>
+                </div>
+                <!-- Q5 -->
+                <div class="qa-item">
+                    <div class="qa-question" onclick="toggleQA(this)"><span class="qa-arrow">▶</span> Q5: 升级系统有哪些？优先升级什么？</div>
+                    <div class="qa-answer">
+                        <strong>五大升级路线：</strong><br>
+                        ① <em>⚙️咖啡机升级：</em>加快所有制作步骤速度（推荐优先升级，提升整体效率）。<br>
+                        ② <em>📦扩大展示柜：</em>增加成品存储容量（减少顾客流失）。<br>
+                        ③ <em>🔧额外制作槽位：</em>可同时制作2~3杯咖啡（中期关键升级）。<br>
+                        ④ <em>🤖自动咖啡机：</em>空闲槽位自动制作美式（后期挂机利器）。<br>
+                        ⑤ <em>📢营销推广：</em>提升声望获取加成和客流量。<br>
+                        <strong>建议顺序：</strong>咖啡机Lv.2 → 展示柜Lv.2 → 制作槽Lv.2 → 根据需求平衡发展。
+                    </div>
+                </div>
+                <!-- Q6 -->
+                <div class="qa-item">
+                    <div class="qa-question" onclick="toggleQA(this)"><span class="qa-arrow">▶</span> Q6: 外挂面板有哪些功能？如何使用？</div>
+                    <div class="qa-answer">
+                        <strong>外挂面板（点击顶部🧪按钮打开）：</strong><br>
+                        ① <em>💰 +500金币：</em>直接增加500金币。<br>
+                        ② <em>📦 原料全满：</em>所有原料数量变为99。<br>
+                        ③ <em>⚡ 完成所有步骤：</em>瞬间完成当前所有槽位的全部制作步骤。<br>
+                        ④ <em>🔬 +20研究点：</em>直接增加20研究点，加速科研。<br>
+                        ⑤ <em>🧊 冻结顾客耐心：</em>顾客耐心不再下降，可从容备货。<br>
+                        <strong>注意：</strong>外挂面板可随时打开/关闭（点击✖或再次点击🧪按钮），适度使用保持游戏乐趣！
+                    </div>
+                </div>
+                <!-- Q7 -->
+                <div class="qa-item">
+                    <div class="qa-question" onclick="toggleQA(this)"><span class="qa-arrow">▶</span> Q7: 存档在哪里？如何保存/读取进度？</div>
+                    <div class="qa-answer">
+                        <strong>存档机制：</strong><br>
+                        ① 点击顶部<em>💾存档</em>按钮，游戏数据保存到浏览器的<em>localStorage</em>中。<br>
+                        ② 点击<em>📂读档</em>按钮，从本地存储恢复上次保存的进度。<br>
+                        ③ 存档包含：金币、声望、天数、库存、菜单解锁状态、升级等级、科研进度等<em>完整数据</em>。<br>
+                        ④ 存档存储在您的浏览器中，<em>清除浏览器缓存会导致存档丢失</em>，请定期备份重要进度。<br>
+                        ⑤ 每天打烊后会自动结算并进入下一天，建议打烊前手动存档。
+                    </div>
+                </div>
+                <!-- Q8 -->
+                <div class="qa-item">
+                    <div class="qa-question" onclick="toggleQA(this)"><span class="qa-arrow">▶</span> Q8: 营业时间是多久？打烊后会发生什么？</div>
+                    <div class="qa-answer">
+                        <strong>时间系统：</strong><br>
+                        ① 营业时间：<em>08:00 ~ 21:00</em>（现实约2.5秒=游戏1小时，约32分钟游戏时间）。<br>
+                        ② 21:00自动打烊，所有制作中的饮品<em>被清空</em>，顾客全部离开。<br>
+                        ③ 打烊结算：获得<em>声望×0.5</em>的金币奖励。<br>
+                        ④ 3秒后自动进入<em>下一天</em>，时间重置为08:00，展示柜清空。<br>
+                        ⑤ <strong>注意：</strong>打烊前请确保已完成重要制作，避免原料浪费。
+                    </div>
+                </div>
+                <!-- Q9 -->
+                <div class="qa-item">
+                    <div class="qa-question" onclick="toggleQA(this)"><span class="qa-arrow">▶</span> Q9: 暂停时间功能怎么用？有什么限制？</div>
+                    <div class="qa-answer">
+                        <strong>暂停时间（⏸️按钮）：</strong><br>
+                        ① 暂停后<em>营业时间停止流逝</em>，不会打烊，顾客不再生成。<br>
+                        ② <em>制作步骤继续运行</em>，您可从容完成所有操作。<br>
+                        ③ 可正常采购原料、调整价格、升级、科研。<br>
+                        ④ 恢复后一切正常继续，是<em>战略备货</em>的核心工具。<br>
+                        ⑤ 无使用次数限制，随时开关。
+                    </div>
+                </div>
+                <!-- Q10 -->
+                <div class="qa-item">
+                    <div class="qa-question" onclick="toggleQA(this)"><span class="qa-arrow">▶</span> Q10: 各饮品的制作步骤分别是什么？</div>
+                    <div class="qa-answer">
+                        <strong>饮品步骤一览：</strong><br>
+                        ☕<em>美式咖啡：</em>研磨豆子 → 萃取咖啡 → 装杯出品（3步）<br>
+                        🥛<em>拿铁：</em>研磨豆子 → 萃取咖啡 → 打发奶泡 → 融合调配 → 装杯出品（5步）<br>
+                        ☁️<em>卡布奇诺：</em>研磨豆子 → 萃取咖啡 → 打发奶泡 → 拉花装饰 → 装杯出品（5步）<br>
+                        🍫<em>摩卡：</em>研磨豆子 → 萃取咖啡 → 加入巧克力 → 打发奶泡 → 融合调配 → 装杯出品（6步）<br>
+                        🧊<em>冰拿铁：</em>研磨豆子 → 萃取咖啡 → 加入冰块 → 融合调配 → 装杯出品（5步）<br>
+                        🍦<em>奶油咖啡：</em>研磨豆子 → 萃取咖啡 → 打发奶油 → 拉花装饰 → 装杯出品（5步）
+                    </div>
+                </div>
+            </div>
+            <hr class="cover-divider">
+            <!-- 开始按钮 -->
+            <button class="cover-start-btn" onclick="startGame()">☕ 开始营业</button>
+        </div>
+    </div>
+
+    <!-- ==================== 游戏主体 ==================== -->
+    <div class="game-container" id="gameContainer">
+        <div class="header">
+            <div class="logo">☕ 咖啡小镇</div>
+            <div class="stat-bar">
+                <div class="stat-item gold-stat">🪙<span class="stat-val" id="goldDisplay">200</span></div>
+                <div class="stat-item">⭐<span class="stat-val" id="repDisplay">50</span></div>
+                <div class="stat-item">📅第<span class="stat-val" id="dayDisplay">1</span>天</div>
+                <div class="stat-item">🕐<span id="timeDisplay">08:00</span></div>
+                <div class="stat-item">🔬<span class="stat-val" id="rpDisplay">0</span></div>
+                <button class="btn-header btn-pause" id="pauseBtn" onclick="window._togglePause()">⏸️暂停</button>
+                <button class="btn-header btn-save" onclick="window._saveGame()">💾存档</button>
+                <button class="btn-header btn-load" onclick="window._loadGame()">📂读档</button>
+                <button class="btn-header btn-cheat" onclick="window._toggleCheat()">🧪外挂</button>
+            </div>
+            <!-- 外挂面板 -->
+            <div class="cheat-panel" id="cheatPanel">
+                <div class="cheat-close-row">
+                    <span style="color:#f0a050;font-weight:700;">🧪 外挂面板</span>
+                    <button class="cheat-close-btn" onclick="window._toggleCheat()">✖</button>
+                </div>
+                <button onclick="window._cheatGold()">💰 +500金币</button>
+                <button onclick="window._cheatResources()">📦 原料全满</button>
+                <button onclick="window._cheatInstantCraft()">⚡ 完成所有步骤</button>
+                <button onclick="window._cheatRP()">🔬 +20研究点</button>
+                <button onclick="window._cheatFreeze()">🧊 冻结顾客耐心</button>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="panel">
+                <div class="panel-title">📦 原料库存</div>
+                <div class="inventory-grid" id="inventoryGrid"></div>
+                <div class="panel-title" style="margin-top:4px;">🛒 市场采购</div>
+                <div id="marketGrid" style="display:flex;flex-direction:column;gap:3px;"></div>
+            </div>
+            <div class="panel">
+                <div class="panel-title">🔧 制作工坊 <span style="font-size:0.6em;">槽位:<span id="slotCount">1</span></span></div>
+                <div id="craftSlots"></div>
+                <div id="craftBtns" style="display:flex;flex-wrap:wrap;gap:3px;"></div>
+                <div class="panel-title">🪟 展示柜 <span style="font-size:0.6em;">容量:<span id="displayCap">5</span></span></div>
+                <div id="drinkDisplay" style="display:flex;flex-wrap:wrap;gap:3px;"></div>
+                <div class="panel-title">🚶 顾客</div>
+                <div id="customerQueue" class="customer-queue"></div>
+            </div>
+            <div class="panel" style="gap:4px;">
+                <div class="panel-title">📋 菜单定价</div>
+                <div id="menuList" style="display:flex;flex-direction:column;gap:3px;"></div>
+                <div class="panel-title">⬆️ 升级</div>
+                <div id="upgradeList" style="display:flex;flex-direction:column;gap:3px;"></div>
+                <div class="panel-title">🔬 科研 <span style="font-size:0.6em;">研究点:<span id="rpDisplay2">0</span></span></div>
+                <div id="researchList" style="display:flex;flex-direction:column;gap:3px;"></div>
+            </div>
+        </div>
+        <div class="panel" style="margin:0 7px 7px;padding:6px 10px;">
+            <div class="panel-title">📜 日志</div>
+            <div class="log-area" id="logArea"></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== 步骤类型 ====================
+            const stepTypes = {
+                grind: { name: '研磨豆子', emoji: '🫘', time: 1.2 },
+                brew: { name: '萃取咖啡', emoji: '☕', time: 1.8 },
+                steam_milk: { name: '打发奶泡', emoji: '🥛', time: 1.5 },
+                mix: { name: '融合调配', emoji: '🥄', time: 1.0 },
+                add_ice: { name: '加入冰块', emoji: '🧊', time: 0.6 },
+                add_chocolate: { name: '加入巧克力', emoji: '🍫', time: 0.8 },
+                whip_cream: { name: '打发奶油', emoji: '🍦', time: 1.3 },
+                decorate: { name: '拉花装饰', emoji: '🎨', time: 1.0 },
+                pour: { name: '装杯出品', emoji: '🥤', time: 0.6 },
+            };
+            const drinkSteps = {
+                americano: ['grind', 'brew', 'pour'],
+                latte: ['grind', 'brew', 'steam_milk', 'mix', 'pour'],
+                cappuccino: ['grind', 'brew', 'steam_milk', 'decorate', 'pour'],
+                mocha: ['grind', 'brew', 'add_chocolate', 'steam_milk', 'mix', 'pour'],
+                iced_latte: ['grind', 'brew', 'add_ice', 'mix', 'pour'],
+                cream_coffee: ['grind', 'brew', 'whip_cream', 'decorate', 'pour'],
+            };
+            const ingredients = [
+                { id: 'coffee_beans', name: '咖啡豆', emoji: '🫘' }, { id: 'milk', name: '牛奶', emoji: '🥛' },
+                { id: 'sugar', name: '糖', emoji: '🍬' }, { id: 'cups', name: '杯子', emoji: '🥤' },
+                { id: 'ice', name: '冰块', emoji: '🧊' }, { id: 'cream', name: '奶油', emoji: '🍦' },
+                { id: 'chocolate', name: '巧克力酱', emoji: '🍫' },
+            ];
+            const defaultPrices = { coffee_beans: 6, milk: 4, sugar: 3, cups: 5, ice: 3, cream: 7, chocolate: 6 };
+
+            // ==================== 默认状态 ====================
+            const defaultState = () => ({
+                gold: 200,
+                reputation: 50,
+                day: 1,
+                hour: 8,
+                minute: 0,
+                served: 0,
+                isOpen: true,
+                timePaused: false,
+                freezeCustomers: false,
+                researchPoints: 0,
+                inventory: { coffee_beans: 30, milk: 15, sugar: 10, cups: 25, ice: 8, cream: 5, chocolate: 4 },
+                drinkStock: [],
+                displayCap: 5,
+                menu: [
+                    { id: 'americano', name: '美式咖啡', emoji: '☕', unlocked: true, price: 8,
+                        recipe: { coffee_beans: 2, cups: 1 }, baseCost: 4 },
+                    { id: 'latte', name: '拿铁', emoji: '🥛', unlocked: true, price: 12, recipe: { coffee_beans: 2,
+                            milk: 1, cups: 1 }, baseCost: 7 },
+                    { id: 'cappuccino', name: '卡布奇诺', emoji: '☁️', unlocked: false, price: 15,
+                        recipe: { coffee_beans: 2, milk: 2, cups: 1 }, baseCost: 9 },
+                    { id: 'mocha', name: '摩卡', emoji: '🍫', unlocked: false, price: 18, recipe: { coffee_beans: 2,
+                            milk: 1, chocolate: 1, cups: 1 }, baseCost: 11 },
+                    { id: 'iced_latte', name: '冰拿铁', emoji: '🧊', unlocked: false, price: 16,
+                        recipe: { coffee_beans: 2, milk: 1, ice: 1, cups: 1 }, baseCost: 9 },
+                    { id: 'cream_coffee', name: '奶油咖啡', emoji: '🍦', unlocked: false, price: 20,
+                        recipe: { coffee_beans: 2, cream: 1, sugar: 1, cups: 1 }, baseCost: 12 },
+                ],
+                upgrades: [
+                    { id: 'machine', name: '咖啡机', level: 1, max: 5, cost: 150, icon: '⚙️' },
+                    { id: 'display', name: '展示柜', level: 1, max: 4, cost: 200, icon: '📦' },
+                    { id: 'slots', name: '制作槽', level: 1, max: 3, cost: 350, icon: '🔧' },
+                    { id: 'auto', name: '自动美式', level: 0, max: 3, cost: 500, icon: '🤖' },
+                    { id: 'marketing', name: '营销', level: 0, max: 3, cost: 350, icon: '📢' },
+                ],
+                craftSlots: [null],
+                maxSlots: 1,
+                autoInterval: 15,
+                customers: [],
+                cidCounter: 0,
+                logs: [],
+                currentResearch: null,
+                researchProgress: 0,
+                researchTotal: 0,
+            });
+
+            const researchProjects = [
+                { id: 'cappuccino', name: '卡布奇诺', emoji: '☁️', rpCost: 15, goldCost: 200, time: 8,
+                    unlocksMenu: 'cappuccino' },
+                { id: 'mocha', name: '摩卡', emoji: '🍫', rpCost: 25, goldCost: 400, time: 14, unlocksMenu: 'mocha' },
+                { id: 'iced_latte', name: '冰拿铁', emoji: '🧊', rpCost: 20, goldCost: 300, time: 10,
+                    unlocksMenu: 'iced_latte' },
+                { id: 'cream_coffee', name: '奶油咖啡', emoji: '🍦', rpCost: 30, goldCost: 500, time: 18,
+                    unlocksMenu: 'cream_coffee' },
+                {
+                    id: 'auto_upgrade',
+                    name: '自动咖啡机强化',
+                    emoji: '🤖',
+                    rpCost: 20,
+                    goldCost: 200,
+                    time: 12,
+                    effect: () => {
+                        const u = G.upgrades.find(u => u.id === 'auto');
+                        if (u.level < u.max) { u.level++;
+                            G.autoInterval = Math.max(4, 15 - (u.level - 1) * 4); }
+                    }
+                },
+            ];
+
+            let G = defaultState();
+            let lastTime = performance.now();
+            let spawnAcc = 0,
+                spawnInterval = 2.5,
+                autoAcc = 0,
+                tickAcc = 0;
+
+            // ==================== 工具 ====================
+            function fmt(h, m) { return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'); }
+
+            function log(msg, type = 'info') {
+                G.logs.unshift({ msg, time: fmt(G.hour, G.minute), type });
+                if (G.logs.length > 60) G.logs.pop();
+                renderLogs();
+            }
+
+            function floatGold(amt, x, y) {
+                const el = document.createElement('div');
+                el.className = 'float-gold';
+                el.textContent = '+' + amt + '🪙';
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1200);
+            }
+
+            function stepTime(type) { return stepTypes[type].time / (1 + (G.upgrades.find(u => u.id === 'machine')
+                    .level - 1) * 0.2); }
+
+            function dispCap() { return 5 + (G.upgrades.find(u => u.id === 'display').level - 1) * 3; }
+
+            function maxSlots() { return G.upgrades.find(u => u.id === 'slots').level; }
+
+            function repBonus() { return 1 + G.upgrades.find(u => u.id === 'marketing').level * 0.3; }
+
+            function freeSlot() { return G.craftSlots.findIndex(s => !s); }
+
+            // ==================== 制作 ====================
+            function canStart(menuItem) {
+                if (!menuItem.unlocked) return false;
+                for (let [k, v] of Object.entries(menuItem.recipe))
+                    if ((G.inventory[k] || 0) < v) return false;
+                if (G.drinkStock.length >= dispCap()) return false;
+                if (freeSlot() === -1) return false;
+                return true;
+            }
+
+            function startCraft(menuItem) {
+                if (!canStart(menuItem)) return;
+                const idx = freeSlot();
+                for (let [k, v] of Object.entries(menuItem.recipe)) G.inventory[k] -= v;
+                const stepIds = drinkSteps[menuItem.id];
+                const steps = stepIds.map(sid => ({ type: sid, totalTime: stepTime(sid), startTime: 0,
+                    progress: 0 }));
+                G.craftSlots[idx] = { menuId: menuItem.id, steps, currentStep: 0, status: 'idle' };
+                log(`🔧 槽位${idx+1} 开始制作${menuItem.emoji}${menuItem.name}`);
+                renderAll();
+            }
+
+            function executeStep(slotIdx) {
+                const slot = G.craftSlots[slotIdx];
+                if (!slot || slot.status !== 'idle') return;
+                const step = slot.steps[slot.currentStep];
+                step.startTime = performance.now();
+                step.progress = 0;
+                slot.status = 'active';
+                log(`🔨 槽位${slotIdx+1}: ${stepTypes[step.type].emoji}${stepTypes[step.type].name}`);
+                renderAll();
+            }
+
+            function advanceStep(slotIdx) {
+                const slot = G.craftSlots[slotIdx];
+                if (!slot || slot.status !== 'done') return;
+                if (slot.currentStep < slot.steps.length - 1) {
+                    slot.currentStep++;
+                    slot.steps[slot.currentStep].startTime = 0;
+                    slot.steps[slot.currentStep].progress = 0;
+                    slot.status = 'idle';
+                    const next = slot.steps[slot.currentStep];
+                    log(`➡️ 槽位${slotIdx+1} 进入: ${stepTypes[next.type].emoji}${stepTypes[next.type].name}`);
+                } else {
+                    const mi = G.menu.find(m => m.id === slot.menuId);
+                    G.drinkStock.push({ name: mi.name, emoji: mi.emoji, sellPrice: mi.price, menuId: mi.id });
+                    log(`✅ 槽位${slotIdx+1} ${mi.emoji}${mi.name} 完成！`);
+                    G.craftSlots[slotIdx] = null;
+                }
+                renderAll();
+            }
+
+            function updateCraftSlots(now) {
+                for (let slot of G.craftSlots) {
+                    if (!slot || slot.status !== 'active') continue;
+                    const step = slot.steps[slot.currentStep];
+                    const elapsed = (now - step.startTime) / 1000;
+                    step.progress = Math.min(1, elapsed / step.totalTime);
+                    if (step.progress >= 1) slot.status = 'done';
+                }
+            }
+
+            // ==================== 科研 ====================
+            function canResearch(proj) {
+                if (G.currentResearch) return false;
+                if (G.researchPoints < proj.rpCost || G.gold < proj.goldCost) return false;
+                if (proj.unlocksMenu) {
+                    const menu = G.menu.find(m => m.id === proj.unlocksMenu);
+                    if (!menu || menu.unlocked) return false;
+                }
+                return true;
+            }
+
+            function startResearch(proj) {
+                if (!canResearch(proj)) return;
+                G.researchPoints -= proj.rpCost;
+                G.gold -= proj.goldCost;
+                G.currentResearch = proj.id;
+                G.researchProgress = 0;
+                G.researchTotal = proj.time;
+                log(`🔬 开始研究: ${proj.emoji||''}${proj.name}`);
+                renderAll();
+            }
+
+            function updateResearch(dt) {
+                if (!G.currentResearch) return;
+                const proj = researchProjects.find(p => p.id === G.currentResearch);
+                if (!proj) { G.currentResearch = null; return; }
+                G.researchProgress += dt;
+                if (G.researchProgress >= G.researchTotal) {
+                    G.researchProgress = 0;
+                    G.currentResearch = null;
+                    if (proj.unlocksMenu) {
+                        const menu = G.menu.find(m => m.id === proj.unlocksMenu);
+                        if (menu) menu.unlocked = true;
+                        log(`🎉 科研完成! 解锁 ${proj.emoji||''}${proj.name}`);
+                    } else if (proj.effect) { proj.effect(); }
+                }
+                renderAll();
+            }
+
+            // ==================== 经营 ====================
+            function buyIngredient(id, q = 5) {
+                const price = (defaultPrices[id] || 5) * q;
+                if (G.gold < price) { log('❌金币不足', 'bad'); return; }
+                G.gold -= price;
+                G.inventory[id] = (G.inventory[id] || 0) + q;
+                log(`🛒 购买${q}份`, 'info');
+                renderAll();
+            }
+
+            function adjustPrice(mi, d) {
+                let np = mi.price + d;
+                if (np < mi.baseCost + 1 || np > mi.baseCost * 5) return;
+                mi.price = np;
+                G.drinkStock.forEach(dr => { if (dr.menuId === mi.id) dr.sellPrice = np; });
+                log(`💰 ${mi.emoji}${mi.name} → ${np}金币`);
+                renderAll();
+            }
+
+            function buyUpgrade(u) {
+                if (u.level >= u.max) return;
+                if (G.gold < u.cost) { log('❌金币不足', 'bad'); return; }
+                G.gold -= u.cost;
+                u.level++;
+                u.cost = Math.floor(u.cost * 1.6);
+                log(`⬆️ ${u.icon}${u.name} Lv.${u.level}`);
+                if (u.id === 'display') G.displayCap = dispCap();
+                if (u.id === 'slots') { G.maxSlots = maxSlots(); while (G.craftSlots.length < G.maxSlots) G.craftSlots
+                        .push(null); }
+                if (u.id === 'auto') G.autoInterval = Math.max(4, 15 - (u.level - 1) * 4);
+                renderAll();
+            }
+
+            // ==================== 顾客 ====================
+            function spawnCustomer() {
+                if (!G.isOpen || G.timePaused) return;
+                if (G.customers.length >= 6) return;
+                const unlocked = G.menu.filter(m => m.unlocked);
+                if (!unlocked.length) return;
+                const want = unlocked[Math.floor(Math.random() * unlocked.length)];
+                G.customers.push({ id: ++G.cidCounter, wanted: want.id, patience: 100, decay: 1.2 + Math.random() *
+                        2 });
+                log(`🚶 顾客想要${want.emoji}${want.name}`);
+                renderAll();
+            }
+
+            function serveCustomer(c) {
+                const idx = G.drinkStock.findIndex(d => d.menuId === c.wanted);
+                if (idx === -1) return false;
+                const drink = G.drinkStock[idx];
+                G.drinkStock.splice(idx, 1);
+                G.gold += drink.sellPrice;
+                G.served++;
+                G.reputation = Math.min(100, G.reputation + Math.floor((1 + Math.random() * 2) * repBonus()));
+                G.researchPoints += 1;
+                G.customers = G.customers.filter(cu => cu.id !== c.id);
+                log(`😊 卖出${drink.emoji}${drink.name} +${drink.sellPrice}💰 +1🔬`);
+                const el = document.getElementById('customerQueue');
+                if (el) { const r = el.getBoundingClientRect();
+                    floatGold(drink.sellPrice, r.left + r.width / 2, r.top); }
+                renderAll();
+                return true;
+            }
+
+            function customerLeave(c) {
+                G.customers = G.customers.filter(cu => cu.id !== c.id);
+                G.reputation = Math.max(0, G.reputation - 2);
+                const mi = G.menu.find(m => m.id === c.wanted);
+                log(`😞 顾客离开(想要${mi?.emoji||''}${mi?.name||'?'})`, 'bad');
+                renderAll();
+            }
+
+            // ==================== 暂停/外挂 ====================
+            function togglePause() { G.timePaused = !G.timePaused;
+                document.getElementById('pauseBtn').classList.toggle('paused', G.timePaused);
+                log(G.timePaused ? '⏸️暂停' : '▶️继续');
+                renderAll(); }
+
+            function toggleCheat() { document.getElementById('cheatPanel').classList.toggle('visible'); }
+
+            function cheatGold() { G.gold += 500;
+                log('🧪 +500金币');
+                renderAll(); }
+
+            function cheatResources() { for (let ing of ingredients) G.inventory[ing.id] = 99;
+                log('🧪 原料全满');
+                renderAll(); }
+
+            function cheatInstantCraft() {
+                for (let slot of G.craftSlots) { if (!slot) continue;
+                    slot.currentStep = slot.steps.length - 1;
+                    slot.steps[slot.currentStep].progress = 1;
+                    slot.status = 'done'; }
+                log('🧪 步骤完成');
+                renderAll();
+            }
+
+            function cheatRP() { G.researchPoints += 20;
+                log('🧪 +20研究点');
+                renderAll(); }
+            let freezeFlag = false;
+
+            function cheatFreeze() { freezeFlag = !freezeFlag;
+                G.freezeCustomers = freezeFlag;
+                log(freezeFlag ? '🧊顾客耐心冻结' : '🧊耐心恢复'); }
+
+            // ==================== 存档 ====================
+            function saveGame() {
+                try {
+                    const data = {
+                        gold: G.gold,
+                        reputation: G.reputation,
+                        day: G.day,
+                        hour: G.hour,
+                        minute: G.minute,
+                        served: G.served,
+                        isOpen: G.isOpen,
+                        inventory: G.inventory,
+                        drinkStock: G.drinkStock,
+                        displayCap: G.displayCap,
+                        menu: G.menu,
+                        upgrades: G.upgrades,
+                        craftSlots: G.craftSlots.map(s => s ? { menuId: s.menuId, currentStep: s.currentStep,
+                            status: s.status, steps: s.steps.map(st => ({ type: st.type, totalTime: st
+                                .totalTime, startTime: 0, progress: 0 })) } : null),
+                        maxSlots: G.maxSlots,
+                        autoInterval: G.autoInterval,
+                        customers: G.customers,
+                        cidCounter: G.cidCounter,
+                        researchPoints: G.researchPoints,
+                        currentResearch: G.currentResearch,
+                        researchProgress: G.researchProgress,
+                        researchTotal: G.researchTotal,
+                    };
+                    localStorage.setItem('coffeeTownSaveV2', JSON.stringify(data));
+                    log('💾 存档成功', 'good');
+                } catch (e) { log('❌存档失败', 'bad'); }
+            }
+
+            function loadGame() {
+                try {
+                    const raw = localStorage.getItem('coffeeTownSaveV2');
+                    if (!raw) { log('❌无存档', 'bad'); return; }
+                    const data = JSON.parse(raw);
+                    Object.assign(G, data);
+                    G.timePaused = false;
+                    document.getElementById('pauseBtn').classList.remove('paused');
+                    lastTime = performance.now();
+                    spawnAcc = 0;
+                    autoAcc = 0;
+                    tickAcc = 0;
+                    log('📂 读档成功', 'good');
+                    renderAll();
+                } catch (e) { log('❌读档失败', 'bad'); }
+            }
+
+            // ==================== 打烊 ====================
+            function closeShop() {
+                G.isOpen = false;
+                G.customers = [];
+                G.craftSlots.fill(null);
+                log('🌙 打烊！');
+                const bonus = Math.floor(G.reputation * 0.5);
+                G.gold += bonus;
+                log(`📊 结算 +${bonus}💰`);
+                setTimeout(() => {
+                    G.day++;
+                    G.hour = 8;
+                    G.minute = 0;
+                    G.isOpen = true;
+                    G.drinkStock = [];
+                    spawnAcc = 0;
+                    autoAcc = 0;
+                    tickAcc = 0;
+                    log(`☀️ 第${G.day}天 营业开始`);
+                    renderAll();
+                }, 3000);
+                renderAll();
+            }
+
+            // ==================== 游戏循环 ====================
+            function loop(ts) {
+                const dt = Math.min((ts - lastTime) / 1000, 0.5);
+                lastTime = ts;
+                const now = performance.now();
+                updateCraftSlots(now);
+                if (!G.timePaused && G.isOpen) {
+                    tickAcc += dt;
+                    while (tickAcc >= 2.5) { tickAcc -= 2.5;
+                        G.minute += 60; if (G.minute >= 60) { G.minute = 0;
+                            G.hour++; if (G.hour >= 21) { closeShop(); break; } } }
+                    if (!G.freezeCustomers) {
+                        spawnAcc += dt;
+                        if (spawnAcc >= spawnInterval / (0.6 + G.reputation / 100 * 0.8)) { spawnAcc = 0;
+                            spawnInterval = 1.5 + Math.random() * 3; if (Math.random() < 0.7) spawnCustomer
+                            (); }
+                        for (let c of G.customers) c.patience -= c.decay * dt;
+                        G.customers = G.customers.filter(c => { if (c.patience <= 0) { customerLeave(c); return false; } return true; });
+                    }
+                    for (let c of [...G.customers]) { if (serveCustomer(c)) break; }
+                    if (G.upgrades.find(u => u.id === 'auto').level > 0) {
+                        autoAcc += dt;
+                        if (autoAcc >= G.autoInterval) { autoAcc = 0;
+                            const am = G.menu.find(m => m.id === 'americano'); if (am && am.unlocked && canStart(
+                                am)) startCraft(am); }
+                    }
+                    updateResearch(dt);
+                }
+                updateUI(now);
+                requestAnimationFrame(loop);
+            }
+
+            function updateUI(now) {
+                document.getElementById('timeDisplay').textContent = fmt(G.hour, G.minute);
+                document.querySelectorAll('.craft-slot').forEach((card, i) => {
+                    if (i >= G.craftSlots.length) return;
+                    const slot = G.craftSlots[i];
+                    const fill = card.querySelector('.progress-mini-fill');
+                    const statusEl = card.querySelector('.slot-status-text');
+                    if (slot) {
+                        card.classList.add('active');
+                        const step = slot.steps[slot.currentStep];
+                        if (slot.status === 'active') { if (fill) fill.style.width = Math.round(step
+                                .progress * 100) + '%'; if (statusEl) statusEl.textContent = stepTypes[
+                                    step.type].name + '...'; } else if (slot.status === 'done') { if (
+                                fill) fill.style.width = '100%'; if (statusEl) statusEl.textContent =
+                                '完成'; } else { if (fill) fill.style.width = '0%'; if (statusEl)
+                                statusEl.textContent = '待操作'; }
+                    } else {
+                        card.classList.remove('active');
+                        if (fill) fill.style.width = '0%';
+                        if (statusEl) statusEl.textContent = '空闲';
+                    }
+                });
+            }
+
+            // ==================== 渲染 ====================
+            function renderAll() {
+                document.getElementById('goldDisplay').textContent = G.gold;
+                document.getElementById('repDisplay').textContent = G.reputation;
+                document.getElementById('dayDisplay').textContent = G.day;
+                document.getElementById('rpDisplay').textContent = G.researchPoints;
+                document.getElementById('rpDisplay2').textContent = G.researchPoints;
+                document.getElementById('displayCap').textContent = dispCap();
+                document.getElementById('slotCount').textContent = G.maxSlots;
+                renderInventory();
+                renderMarket();
+                renderCraftSlots();
+                renderDrinkDisplay();
+                renderCustomers();
+                renderMenu();
+                renderUpgrades();
+                renderResearch();
+                renderLogs();
+            }
+
+            function renderInventory() {
+                const g = document.getElementById('inventoryGrid');
+                g.innerHTML = ingredients.map(i => {
+                    const c = G.inventory[i.id] || 0;
+                    return `<div class="inv-item"><span>${i.emoji}${i.name}</span> <span class="inv-count">${c}</span></div>`;
+                }).join('');
+            }
+
+            function renderMarket() {
+                const g = document.getElementById('marketGrid');
+                g.innerHTML = ingredients.map(i => {
+                    const p = defaultPrices[i.id];
+                    const t = p * 5;
+                    return `<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.2);padding:3px 5px;border-radius:6px;"><span style="font-size:0.65em;">${i.emoji}${i.name}</span><button class="btn btn-buy btn-xs" onclick="window._buy('${i.id}')" ${G.gold<t?'disabled':''}>买5份 ${t}🪙</button></div>`;
+                }).join('');
+            }
+
+            function renderCraftSlots() {
+                const container = document.getElementById('craftSlots');
+                while (G.craftSlots.length < G.maxSlots) G.craftSlots.push(null);
+                container.innerHTML = G.craftSlots.map((slot, i) => {
+                    const mi = slot ? G.menu.find(m => m.id === slot.menuId) : null;
+                    const steps = slot ? slot.steps : [];
+                    const dots = steps.map((s, si) => {
+                        let cls = 'pending';
+                        if (slot) { if (si < slot.currentStep) cls = 'done';
+                            else if (si === slot.currentStep) cls = 'active'; }
+                        return `<span class="step-dot ${cls}">${stepTypes[s.type]?.emoji||'?'}</span>`;
+                    }).join('<span style="color:#5a4a3a;">▸</span>');
+                    const progress = slot && slot.status === 'active' ? Math.round(steps[slot.currentStep]
+                        .progress * 100) : 0;
+                    let actionBtn = '';
+                    if (slot) {
+                        if (slot.status === 'idle') actionBtn =
+                            `<button class="btn btn-primary btn-sm" onclick="window._execStep(${i})">开始 ${stepTypes[steps[slot.currentStep].type].name}</button>`;
+                        else if (slot.status === 'done') actionBtn =
+                            `<button class="btn btn-primary btn-sm" onclick="window._advStep(${i})">${slot.currentStep<steps.length-1?'继续下一步':'完成出品'}</button>`;
+                        else actionBtn =
+                            '<span style="font-size:0.6em;color:#f0a050;">进行中...</span>';
+                    }
+                    return `<div class="craft-slot ${slot?'active':''}">
+                <div class="slot-header"><span>🔲槽${i+1} ${mi?.emoji||''}${mi?.name||''}</span><span class="slot-status-text"></span>${slot?`<button class="btn-cancel" onclick="window._cancelSlot(${i})">取消</button>`:''}</div>
+                <div class="steps-row">${dots}</div>
+                <div class="progress-mini"><div class="progress-mini-fill" style="width:${progress}%"></div></div>
+                <div style="margin-top:3px;">${actionBtn}</div></div>`;
+                }).join('');
+                const btnsDiv = document.getElementById('craftBtns');
+                const unlocked = G.menu.filter(m => m.unlocked);
+                btnsDiv.innerHTML = unlocked.map(m =>
+                    `<button class="btn btn-primary btn-sm" onclick="window._start('${m.id}')" ${!canStart(m)?'disabled':''}>${m.emoji}制作${m.name}</button>`
+                    ).join('');
+            }
+
+            function renderDrinkDisplay() {
+                const c = document.getElementById('drinkDisplay');
+                c.innerHTML = G.drinkStock.length ? G.drinkStock.map(d =>
+                    `<div style="background:rgba(200,140,60,0.2);border-radius:8px;padding:2px 7px;font-size:0.65em;">${d.emoji}${d.name}</div>`
+                    ).join('') : '<span style="color:#6a5a4a;font-size:0.65em;">空</span>';
+            }
+
+            function renderCustomers() {
+                const c = document.getElementById('customerQueue');
+                c.innerHTML = G.customers.length ? G.customers.map(cu => {
+                    const mi = G.menu.find(m => m.id === cu.wanted);
+                    return `<div class="customer-bubble">🧑${mi?.emoji||''}${mi?.name||'?'}</div>`;
+                }).join('') : '<span style="color:#6a5a4a;font-size:0.65em;">暂无</span>';
+            }
+
+            function renderMenu() {
+                const c = document.getElementById('menuList');
+                c.innerHTML = G.menu.map(m => {
+                    if (!m.unlocked)
+                        return `<div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.2);padding:3px 5px;border-radius:6px;"><span>🔒${m.emoji}${m.name}</span><span style="font-size:0.55em;">需科研</span></div>`;
+                    return `<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.15);padding:3px 5px;border-radius:6px;"><span>${m.emoji}${m.name}</span><span style="color:#f4c542;font-size:0.7em;">${m.price}🪙</span><span><button class="btn btn-xs btn-outline" onclick="window._adjPrice('${m.id}',-1)">-</button><button class="btn btn-xs btn-outline" onclick="window._adjPrice('${m.id}',1)">+</button></span></div>`;
+                }).join('');
+            }
+
+            function renderUpgrades() {
+                const c = document.getElementById('upgradeList');
+                c.innerHTML = G.upgrades.map(u =>
+                    `<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.2);padding:3px 5px;border-radius:6px;"><span>${u.icon}${u.name} Lv.${u.level}/${u.max}</span>${u.level>=u.max?'<span style="color:#5cb878;font-size:0.6em;">满级</span>':`<button class="btn btn-upgrade btn-xs" onclick="window._upgrade('${u.id}')" ${G.gold<u.cost?'disabled':''}>${u.cost}🪙</button>`}</div>`
+                    ).join('');
+            }
+
+            function renderResearch() {
+                const c = document.getElementById('researchList');
+                let html = '';
+                if (G.currentResearch) {
+                    const proj = researchProjects.find(p => p.id === G.currentResearch);
+                    const pct = proj ? Math.round(G.researchProgress / G.researchTotal * 100) : 0;
+                    html +=
+                        `<div style="background:rgba(0,0,0,0.3);padding:4px;border-radius:4px;"><span>🔬研究: ${proj?.name||''} ${pct}%</span><div style="height:3px;background:#1a1008;margin-top:2px;"><div style="height:100%;background:#5b9bd5;width:${pct}%"></div></div></div>`;
+                }
+                researchProjects.forEach(p => {
+                    const menu = p.unlocksMenu ? G.menu.find(m => m.id === p.unlocksMenu) : null;
+                    if (menu && menu.unlocked) return;
+                    const can = canResearch(p);
+                    html +=
+                        `<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.2);padding:3px 5px;border-radius:6px;"><span>${p.emoji||'🔬'}${p.name}</span><span style="font-size:0.55em;">🔬${p.rpCost}💰${p.goldCost}⏱${p.time}s</span><button class="btn btn-upgrade btn-xs" onclick="window._research('${p.id}')" ${!can?'disabled':''}>研究</button></div>`;
+                });
+                c.innerHTML = html;
+            }
+
+            function renderLogs() {
+                const a = document.getElementById('logArea');
+                a.innerHTML = G.logs.slice(0, 18).map(l =>
+                    `<div class="log-entry ${l.type}">[${l.time}] ${l.msg}</div>`).join('');
+            }
+
+            // ==================== 全局暴露 ====================
+            window._start = (id) => { const m = G.menu.find(m => m.id === id); if (m) startCraft(m); };
+            window._execStep = (i) => executeStep(i);
+            window._advStep = (i) => advanceStep(i);
+            window._cancelSlot = (i) => { if (G.craftSlots[i]) { const mi = G.menu.find(m => m.id === G.craftSlots[i]
+                        .menuId); if (mi)
+                        for (let [k, v] of Object.entries(mi.recipe)) G.inventory[k] += v;
+                    G.craftSlots[i] = null;
+                    log('取消制作');
+                    renderAll(); } };
+            window._buy = (id) => buyIngredient(id);
+            window._adjPrice = (id, d) => { const m = G.menu.find(m => m.id === id); if (m) adjustPrice(m, d); };
+            window._upgrade = (id) => { const u = G.upgrades.find(u => u.id === id); if (u) buyUpgrade(u); };
+            window._research = (id) => { const p = researchProjects.find(p => p.id === id); if (p) startResearch(
+            p); };
+            window._togglePause = togglePause;
+            window._toggleCheat = toggleCheat;
+            window._cheatGold = cheatGold;
+            window._cheatResources = cheatResources;
+            window._cheatInstantCraft = cheatInstantCraft;
+            window._cheatRP = cheatRP;
+            window._cheatFreeze = cheatFreeze;
+            window._saveGame = saveGame;
+            window._loadGame = loadGame;
+
+            // ==================== 封面Q&A折叠 ====================
+            window.toggleQA = function(el) {
+                el.classList.toggle('open');
+                const answer = el.nextElementSibling;
+                if (answer) answer.classList.toggle('expanded');
+            };
+
+            // ==================== 开始游戏 ====================
+            window.startGame = function() {
+                document.getElementById('coverOverlay').classList.add('hidden');
+                G = defaultState();
+                G.displayCap = dispCap();
+                G.maxSlots = maxSlots();
+                G.autoInterval = Math.max(4, 15 - (G.upgrades.find(u => u.id === 'auto').level - 1) * 4);
+                while (G.craftSlots.length < G.maxSlots) G.craftSlots.push(null);
+                lastTime = performance.now();
+                spawnAcc = 0;
+                autoAcc = 0;
+                tickAcc = 0;
+                renderAll();
+                log('☕ 咖啡小镇 v1.0.0 开业！手动研磨每一步', 'info');
+                log('💡 点击槽位按钮手动执行每个制作步骤', 'info');
+                log('🔬 服务顾客获取研究点，科研解锁新饮品', 'info');
+                requestAnimationFrame(loop);
+            };
+
+            // 初始渲染
+            renderAll();
+        })();
+    </script>
+</body>
+</html>
