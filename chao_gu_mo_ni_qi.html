@@ -19,8 +19,8 @@
             --red-bg: rgba(255, 107, 107, 0.12);
             --green: #00d4aa;
             --green-bg: rgba(0, 212, 170, 0.12);
-            --gold: #f0b90b;
-            --gold-bg: rgba(240, 185, 11, 0.15);
+            --gold: #ffd700;      /* 深色主题用亮金色 */
+            --gold-bg: rgba(255, 215, 0, 0.15);
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             --radius: 12px;
             --radius-sm: 8px;
@@ -38,9 +38,9 @@
             --text-primary: #1f2328;
             --text-secondary: #57606a;
             --text-muted: #8b949e;
+            --gold: #b8860b;      /* 浅色主题用深金色（暗金） */
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
         }
-        /* 浅色主题下调整部分元素 */
         body.light-theme .header-time {
             background: var(--bg-card);
             border-color: var(--border-color);
@@ -181,7 +181,7 @@
             transition: var(--transition);
         }
         .header-time .fast-forward-btn:hover {
-            box-shadow: 0 0 16px rgba(240,185,11,0.3);
+            box-shadow: 0 0 16px rgba(255,215,0,0.3);
             transform: scale(1.04);
         }
         .theme-toggle-btn {
@@ -384,7 +384,7 @@
         }
         .market-toolbar .search-box input:focus {
             border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(240,185,11,0.15);
+            box-shadow: 0 0 0 3px rgba(255,215,0,0.15);
         }
         .market-toolbar .search-box input::placeholder {
             color: var(--text-muted);
@@ -568,6 +568,7 @@
             max-height: 80vh;
             overflow-y: auto;
             transition: background 0.3s, border-color 0.3s;
+            position: relative;
         }
         @keyframes modalIn {
             from { opacity: 0; transform: scale(0.94) translateY(20px); }
@@ -602,7 +603,7 @@
         }
         .modal input[type="number"]:focus {
             border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(240,185,11,0.12);
+            box-shadow: 0 0 0 3px rgba(255,215,0,0.12);
         }
         .modal .modal-actions {
             display: flex;
@@ -633,7 +634,7 @@
             color: #0b0e14;
         }
         .modal .modal-actions .btn-confirm:hover {
-            box-shadow: 0 0 24px rgba(240,185,11,0.25);
+            box-shadow: 0 0 24px rgba(255,215,0,0.25);
             transform: scale(1.02);
         }
         .modal .modal-actions .btn-confirm.buy {
@@ -643,6 +644,24 @@
         .modal .modal-actions .btn-confirm.sell {
             background: var(--green);
             color: #0b0e14;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            font-size: 28px;
+            line-height: 1;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+        }
+        .modal-close-btn:hover {
+            color: var(--text-primary);
+            transform: scale(1.2);
         }
 
         .chart-modal-canvas {
@@ -764,6 +783,7 @@
                 font-size: 10px;
             }
             .chart-modal-canvas { max-height: 200px; }
+            .modal-close-btn { font-size: 24px; top: 8px; right: 12px; }
         }
         @media (max-width: 480px) {
             .header-stats {
@@ -908,6 +928,7 @@
 <!-- ===== 交易弹窗 ===== -->
 <div class="modal-overlay" id="tradeModal">
     <div class="modal">
+        <button class="modal-close-btn" id="tradeModalClose">&times;</button>
         <div class="modal-title" id="modalTitle">📈 买入</div>
         <div class="modal-sub" id="modalSub">
             <span class="highlight" id="modalSymbol">---</span> &nbsp;·&nbsp; 现价 <span id="modalPrice">0.00</span>
@@ -928,6 +949,7 @@
 <!-- ===== 图表弹窗 ===== -->
 <div class="modal-overlay" id="chartModal">
     <div class="modal" style="max-width: 700px;">
+        <button class="modal-close-btn" id="chartModalCloseBtn">&times;</button>
         <div class="modal-title" id="chartModalTitle">📈 价格走势</div>
         <div class="modal-sub" id="chartModalSub"><span class="highlight" id="chartModalSymbol">---</span></div>
         <canvas id="chartModalCanvas" class="chart-modal-canvas" width="600" height="250"></canvas>
@@ -1358,7 +1380,7 @@
     }
 
     // =============================================================
-    // 9. 图表弹窗（支持数据点不足时显示提示）
+    // 9. 图表弹窗（支持数据点不足时显示提示，使用CSS变量中的金色）
     // =============================================================
     function openChartModal(id, market) {
         const list = market === 'stock' ? STOCK_DATA : FUTURES_DATA;
@@ -1367,6 +1389,9 @@
         const hist = item.history || [];
         document.getElementById('chartModalSymbol').textContent = `${item.name} (${item.code})`;
         document.getElementById('chartModal').classList.add('open');
+
+        // 获取当前主题下的金色
+        const goldColor = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#ffd700';
 
         const canvas = document.getElementById('chartModalCanvas');
         const ctx = canvas.getContext('2d');
@@ -1382,7 +1407,7 @@
                 const x = w/2, y = h/2 + 20;
                 ctx.beginPath();
                 ctx.arc(x, y, 4, 0, 2*Math.PI);
-                ctx.fillStyle = 'var(--gold)';
+                ctx.fillStyle = goldColor;
                 ctx.fill();
                 ctx.fillStyle = 'var(--text-muted)';
                 ctx.font = '12px Inter';
@@ -1407,7 +1432,8 @@
             ctx.textAlign = 'right';
             ctx.fillText((max - (i/4)*range).toFixed(2), pad.left-4, y+3);
         }
-        ctx.strokeStyle = 'var(--gold)';
+        // 使用当前金色
+        ctx.strokeStyle = goldColor;
         ctx.lineWidth = 2;
         ctx.beginPath();
         for (let i=0; i<data.length; i++) {
@@ -1416,7 +1442,7 @@
             i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
         }
         ctx.stroke();
-        ctx.fillStyle = 'var(--gold)';
+        ctx.fillStyle = goldColor;
         for (let i=0; i<data.length; i++) {
             const x = pad.left + (i/(data.length-1))*cw;
             const y = pad.top + ch - ((data[i]-min)/range)*ch;
@@ -1543,12 +1569,20 @@
     }
 
     function setupModal() {
+        document.getElementById('tradeModalClose').addEventListener('click', closeTradeModal);
         document.getElementById('modalCancel').addEventListener('click', closeTradeModal);
         document.getElementById('modalConfirm').addEventListener('click', confirmTrade);
         document.getElementById('tradeModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeTradeModal(); });
+        
+        document.getElementById('chartModalCloseBtn').addEventListener('click', () => document.getElementById('chartModal').classList.remove('open'));
         document.getElementById('chartModalClose').addEventListener('click', () => document.getElementById('chartModal').classList.remove('open'));
+        document.getElementById('chartModal').addEventListener('click', e => { if (e.target === e.currentTarget) document.getElementById('chartModal').classList.remove('open'); });
+        
         document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') { closeTradeModal(); document.getElementById('chartModal').classList.remove('open'); }
+            if (e.key === 'Escape') { 
+                closeTradeModal(); 
+                document.getElementById('chartModal').classList.remove('open'); 
+            }
             if (e.key === 'Enter' && document.getElementById('tradeModal').classList.contains('open')) confirmTrade();
         });
     }
@@ -1564,11 +1598,9 @@
         const toggleBtn = document.getElementById('themeToggle');
         toggleBtn.addEventListener('click', function() {
             document.body.classList.toggle('light-theme');
-            // 更新按钮图标
             this.textContent = document.body.classList.contains('light-theme') ? '☀️' : '🌙';
-            // 重新渲染图表（因为canvas颜色使用了CSS变量，需要重绘）
-            // 由于图表是在弹窗中绘制的，重新打开时自动重绘；但为了已打开的图表，我们可以不处理，关闭再打开即可。
             showToast('🎨 主题切换', document.body.classList.contains('light-theme') ? '切换到浅色模式' : '切换到深色模式', 'info');
+            // 图表颜色会在下次打开时自动更新（因为读取CSS变量）
         });
     }
 
@@ -1577,7 +1609,6 @@
     // =============================================================
     function init() {
         document.getElementById('virtualTimeDisplay').textContent = formatDateFromMs(virtualTimeMs);
-        // 确保每个品种有初始历史
         STOCK_DATA.forEach(s => { if (!s.history || s.history.length === 0) s.history = [s.price]; s.change = 0; });
         FUTURES_DATA.forEach(f => { if (!f.history || f.history.length === 0) f.history = [f.price]; f.change = 0; });
         renderAll();
